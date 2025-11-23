@@ -14,7 +14,7 @@
                   <h6 class="mb-0">{{ post.title }}</h6>
                   <p class="mb-0 opacity-75">{{ post.content|truncatechars:80 }}</p>
                 </div>
-                <small class="opacity-50 text-nowrap">3d ago</small>
+                <small class="opacity-50 text-nowrap">{{ post.published_at|timesince }} ago</small>
               </div>
              </a>
             {% endfor %}

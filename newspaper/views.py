@@ -55,6 +55,11 @@ class PostDetailView(SidebarMixin, DetailView):
         return super().get_queryset().filter(published_at__isnull=False, status="active")
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        current_post = self.object
+        current_post.views_count += 1
+        current_post.save()
+
         context["related_articles"] = (
             Post.objects.filter(
                 published_at__isnull=False,
@@ -91,5 +96,8 @@ class ContactCreateView(SuccessMessageMixin, CreateView):
             "There was an error sending your message. Please check the form.",
         )
         return super().form_invalid(form)
-            
-        
+
+class TagListView(ListView):
+    model = Tag
+    template_name = "newsportal/tags.html"
+    context_object_name = "tags"

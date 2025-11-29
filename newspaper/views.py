@@ -83,6 +83,8 @@ class CategoryListView(ListView):
     template_name = "newsportal/categories.html"
     context_object_name = "categories"
 
+    
+
 class ContactCreateView(SuccessMessageMixin, CreateView):
     model = Contact
     template_name = "newsportal/contact.html"
@@ -101,3 +103,42 @@ class TagListView(ListView):
     model = Tag
     template_name = "newsportal/tags.html"
     context_object_name = "tags"
+
+
+class TagPostsView(SidebarMixin, ListView):
+    model = Post
+    template_name = "newsportal/list/tag_posts.html"
+    context_object_name = "posts"
+    paginate_by = 1 
+
+    def get_queryset(self):
+        tag_id = self.kwargs["pk"]
+        return Post.objects.filter(
+            published_at__isnull=False,
+            status="active",
+            tag__id=tag_id   
+        ).order_by("-published_at")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tag"] = Tag.objects.get(pk=self.kwargs["pk"])
+        return context
+    
+class CategoryPostsView(SidebarMixin, ListView):
+    model = Post
+    template_name = "newsportal/list/category_posts.html"
+    context_object_name = "posts"
+    paginate_by = 1  
+
+    def get_queryset(self):
+        category_id = self.kwargs["pk"]
+        return Post.objects.filter(
+            published_at__isnull=False,
+            status="active",
+            category__id=category_id
+        ).order_by("-published_at")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["category"] = Category.objects.get(pk=self.kwargs["pk"])
+        return context

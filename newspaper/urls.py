@@ -9,4 +9,7 @@ urlpatterns = [
     path("categories/", views.CategoryListView.as_view(), name="categories"),
     path("contact/", views.ContactCreateView.as_view(), name="contact"),
     path("tags/", views.TagListView.as_view(), name="tags"),
+    path("tag/<int:pk>/", views.TagPostsView.as_view(), name="tag-posts"),
+    path("category/<int:pk>/", views.CategoryPostsView.as_view(), name="category-posts"),
+    
 ]

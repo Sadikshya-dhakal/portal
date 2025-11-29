@@ -9,18 +9,23 @@
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
 
             {% for category in categories %}
-            <!-- Category Card 1 -->
-             <div class="col">
+            <!-- Category Card -->
+            <div class="col">
                 <div class="card h-100 shadow-sm list-item-card">
                     <div class="card-body">
-                        <h5 class="card-title"><a href="category.html"><i class="{{ category.icon }} me-2"></i>{{ category.name|title }}</a></h5>
+                        <h5 class="card-title">
+                            <!-- ✅ Corrected link -->
+                            <a href="{% url 'category-posts' category.pk %}">
+                                <i class="{{ category.icon|default:'bi-folder-fill' }} me-2"></i>
+                                {{ category.name|title }}
+                            </a>
+                        </h5>
                         <p class="card-text">{{ category.description }}</p>
                     </div>
                 </div>
-             </div>
+            </div>
             {% endfor %}
-           
-            
+
         </div>
     </div>
 

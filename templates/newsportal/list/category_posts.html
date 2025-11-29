@@ -1,0 +1,102 @@
+{% extends "newsportal/base.html" %}
+
+{% block content %}
+<!-- Main Content Area -->
+<div class="container mt-4">
+    <!-- Dynamically set category name -->
+    <h1 class="mb-4 section-title">
+        <span>Category: <span class="category-name-placeholder">{{ category.name }}</span></span>
+    </h1>
+
+    <div class="row">
+        <!-- News Listing Column -->
+        <div class="col-lg-8">
+            {% for post in posts %}
+            <div class="card mb-4 shadow-sm news-list-item">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <img src="{{ post.featured_image.url }}" class="img-fluid rounded-start" alt="{{ post.title }}">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a>
+                            </h5>
+                            <p class="card-text">{{ post.summary|truncatewords:25 }}</p>
+                            <p class="card-text">
+                                <small class="text-muted">Published: {{ post.published_at|date:"F j, Y" }}</small>
+                            </p>
+                            <a href="{% url 'post-detail' post.pk %}" class="btn btn-outline-success btn-sm">Read More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p>No posts found for this category.</p>
+            {% endfor %}
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Pagination" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link text-success" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link {% if page_obj.number == num %}bg-success text-white{% else %}text-success{% endif %}" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link text-success" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="position-sticky sticky-sidebar-offset">
+                <!-- Most Popular -->
+                <div class="p-4 mb-3 bg-light rounded sidebar-widget shadow-sm">
+                    <h4 class="fst-italic section-title"><span>Most Popular</span></h4>
+                    <ul class="list-unstyled mb-0 popular-list">
+                        {% for post in popular_posts %}
+                        <li>
+                            <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" width="55" height="55">
+                            <a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Advertisement -->
+                <div class="p-4 mb-3 rounded sidebar-widget shadow-sm text-center">
+                    <h4 class="fst-italic section-title"><span>Advertisement</span></h4>
+                    <img src="https://placehold.co/300x250/e8f5e9/333333?text=Ad+Banner" class="img-fluid" alt="Advertisement">
+                </div>
+
+                <!-- Newsletter Subscription -->
+                <div class="p-4 mb-3 rounded sidebar-widget newsletter-widget shadow-sm">
+                    <h4 class="fst-italic section-title"><span>Subscribe</span></h4>
+                    <p>Stay updated with our newsletter.</p>
+                    <form>
+                        <div class="mb-3">
+                            <label for="newsletterEmailCategory" class="form-label visually-hidden">Email address</label>
+                            <input type="email" class="form-control" id="newsletterEmailCategory" placeholder="Enter your email">
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

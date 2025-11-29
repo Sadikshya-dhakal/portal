@@ -10,7 +10,7 @@
              <!-- Use the existing .article-tags styling for consistency -->
              <div class="article-tags">
                 {% for tag in tags %}
-                 <a href="#">{{ tag.name }}</a>
+                 <a href="{% url 'tag-posts' tag.pk %}">{{ tag.name }}</a>
                 {% endfor %}
              </div>
         </div>

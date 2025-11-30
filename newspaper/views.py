@@ -1,12 +1,16 @@
 from django.shortcuts import render
-from django.urls import reverse_lazy
-from newspaper.forms import ContactForm
+from django.urls import reverse, reverse_lazy
+from newspaper.forms import CommentForm, ContactForm
 from newspaper.models import Post, OurTeam, Category, Tag, Contact
 from django.views.generic import TemplateView, ListView, DetailView, CreateView
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.views.generic.edit import FormMixin
+from django.http import JsonResponse
+from django.views import View
+from newspaper.forms import NewsletterForm
 
 class SidebarMixin:
     def get_context_data(self, **kwargs):
@@ -14,6 +18,8 @@ class SidebarMixin:
         context["popular_posts"] = Post.objects.filter(
             published_at__isnull=False, status="active"
         ).order_by("-published_at")[:5]
+        context["categories"] = Category.objects.all()  # ✅ Add this line
+        context["tags"] = Tag.objects.all()  
         return context
 
 class HomeView(SidebarMixin, TemplateView):
@@ -47,15 +53,20 @@ class PostListView(SidebarMixin, ListView):
             published_at__isnull=False, status="active"
         ).order_by("-published_at")
 
-class PostDetailView(SidebarMixin, DetailView):
+class PostDetailView(SidebarMixin,FormMixin, DetailView):
     model = Post
     template_name = "newsportal/detail/detail.html"
     context_object_name = "post"
+    form_class = CommentForm
+
     def get_queryset(self):
-        return super().get_queryset().filter(published_at__isnull=False, status="active")
+        query = super().get_queryset()
+        query = query.filter(published_at__isnull=False, status="active")
+        return query
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
+        
         current_post = self.object
         current_post.views_count += 1
         current_post.save()
@@ -70,6 +81,26 @@ class PostDetailView(SidebarMixin, DetailView):
             .order_by("-published_at", "-views_count")[:2]
         )
         return context
+    
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+        
+    def form_valid(self, form):
+        comment = form.save(commit=False)
+        comment.post = self.object
+        comment.user = self.request.user
+        comment.save()
+        messages.success(self.request, "Your comment has been added successfully.")
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse("post-detail", kwargs={"pk": self.object.pk})
+
 
 class AboutView(TemplateView):
     template_name = "newsportal/about.html"
@@ -142,3 +173,35 @@ class CategoryPostsView(SidebarMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["category"] = Category.objects.get(pk=self.kwargs["pk"])
         return context
+
+
+class NewsletterView(View):
+
+    def post(self, request):
+        is_ajax == request.headers.get("x-requested-with")
+        if is_ajax == "XMLhttpRequest":
+            form = NewsletterForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return JsonResponse(
+                    {
+                    "success": True,
+                    "message": "Successfully subscribed to the newsletter.",
+                    },
+                    status=201
+               )
+            else:
+                return JsonResponse(
+                    {
+                      "success": False,
+                      "message": "Cannot suscribe to the newsletter.", 
+                    },
+                    status=400,
+                )
+        else:
+            return JsonResponse(
+                {
+                    "success": False,
+                
+                },
+            )

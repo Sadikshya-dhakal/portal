@@ -83,6 +83,22 @@ class Contact(TimeStampModel):
         ordering = ["created_at"]
 
 
+
+class Comment(TimeStampModel):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey("auth.User", on_delete=models.CASCADE)
+    content = models.TextField()
+
+    def __str__(self):
+        return "Comment by {} on {}".format(self.user.username, self.post.title)
+
+
+class Newsletter(TimeStampModel):
+    email = models.EmailField(unique=True)
+
+    def __str__(self):
+        return self.email
+
 # Post - Author
 # 1 user can add M post => M
 # 1 post is associated to only 1 user =>1

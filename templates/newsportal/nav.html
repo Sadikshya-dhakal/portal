@@ -20,7 +20,7 @@
           <ul class="dropdown-menu">
             {% for category in categories %}
              <li>
-              <a class="dropdown-item" href="category.html">{{ category.name }}</a>
+              <a class="dropdown-item" href="{% url 'category-posts' category.pk %}">{{ category.name|upper }}</a>
              </li>
             {% endfor %}
             

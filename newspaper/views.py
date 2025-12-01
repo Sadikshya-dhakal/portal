@@ -2,14 +2,13 @@ from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from newspaper.forms import CommentForm, ContactForm
 from newspaper.models import Post, OurTeam, Category, Tag, Contact
-from django.views.generic import TemplateView, ListView, DetailView, CreateView
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, View
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic.edit import FormMixin
 from django.http import JsonResponse
-from django.views import View
 from newspaper.forms import NewsletterForm
 
 class SidebarMixin:
@@ -18,7 +17,7 @@ class SidebarMixin:
         context["popular_posts"] = Post.objects.filter(
             published_at__isnull=False, status="active"
         ).order_by("-published_at")[:5]
-        context["categories"] = Category.objects.all()  # ✅ Add this line
+        context["categories"] = Category.objects.all() 
         context["tags"] = Tag.objects.all()  
         return context
 
@@ -178,8 +177,8 @@ class CategoryPostsView(SidebarMixin, ListView):
 class NewsletterView(View):
 
     def post(self, request):
-        is_ajax == request.headers.get("x-requested-with")
-        if is_ajax == "XMLhttpRequest":
+        is_ajax = request.headers.get("x-requested-with")
+        if is_ajax == "XMLHttpRequest":
             form = NewsletterForm(request.POST)
             if form.is_valid():
                 form.save()
@@ -202,6 +201,8 @@ class NewsletterView(View):
             return JsonResponse(
                 {
                     "success": False,
+                    "message": "Cannot process. Must be an AJAX XMLHttpRequest",
                 
                 },
+                status=400,
             )

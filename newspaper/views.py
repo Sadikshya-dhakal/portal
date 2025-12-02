@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from newspaper.forms import CommentForm, ContactForm
-from newspaper.models import Post, OurTeam, Category, Tag, Contact
+from newspaper.models import Post, OurTeam, Category, Tag, Contact, Advertisement
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, View
 from django.utils import timezone
 from datetime import timedelta
@@ -10,6 +10,8 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic.edit import FormMixin
 from django.http import JsonResponse
 from newspaper.forms import NewsletterForm
+from django.core.paginator import PageNotAnInteger, Paginator
+from django.db.models import Q
 
 class SidebarMixin:
     def get_context_data(self, **kwargs):
@@ -17,8 +19,14 @@ class SidebarMixin:
         context["popular_posts"] = Post.objects.filter(
             published_at__isnull=False, status="active"
         ).order_by("-published_at")[:5]
+
         context["categories"] = Category.objects.all() 
         context["tags"] = Tag.objects.all()  
+
+        context["advertisement"] = ( 
+            Advertisement.objects.all().order_by("-created_at").first()
+
+        )
         return context
 
 class HomeView(SidebarMixin, TemplateView):
@@ -206,3 +214,41 @@ class NewsletterView(View):
                 },
                 status=400,
             )
+
+class PostSearchView(View):
+    template_name = "newsportal/list/list.html"
+
+    def get(self, request):
+        print(request.GET)
+        query = request.GET["query"]
+        post_list = Post.objects.filter(
+            (Q(title__icontains=query) | Q(content__icontains=query))
+            & Q(status="active")
+            & Q(published_at__isnull=False)
+        ).order_by(
+            "-published_at"
+        )
+
+        page = request.GET.get("page", 1)
+        paginate_by = 1
+        paginator = Paginator(post_list, paginate_by)
+        try:
+            posts = paginator.page(page)
+        except PageNotAnInteger:
+            posts = paginator.page(1)
+
+        popular_posts = Post.objects.filter(
+            published_at__isnull=False, status="active"
+        ).order_by("-published_at")[:5]
+
+        return render(
+            request,
+            self.template_name,
+            {
+                "page_obj": posts,
+                "query": query,
+                "popular_posts": popular_posts,
+                
+            },
+        )
+

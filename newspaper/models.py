@@ -1,5 +1,5 @@
 from django.db import models
-
+from tinymce.models import HTMLField
 # Create your models here.
 # title
 #content,description
@@ -46,7 +46,7 @@ class Post(TimeStampModel):
         ("in_active", "Inactive"),
     ]
     title =models.CharField(max_length=200)
-    content = models.TextField()
+    content = HTMLField()
     featured_image = models.ImageField(upload_to="post_images/%Y/%m/%d", blank=False)
     author = models.ForeignKey("auth.User", on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")

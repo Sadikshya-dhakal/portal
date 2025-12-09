@@ -16,7 +16,7 @@
                      alt="Trending News 1" />
                 <div class="card-body">
                   <h5 class="card-title">{{ post.title }}</h5>
-                  <p class="card-text">{{ post.content|truncatechars:50 }}</p>
+                  <p class="card-text">{{ post.content|striptags|truncatechars:50 }}</p>
                   <a href="{% url 'post-detail' post.pk %}" class="btn btn-outline-success btn-sm">Read More</a>
                 </div>
                 <div class="card-footer">

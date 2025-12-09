@@ -14,7 +14,7 @@
                        alt="Popular 1" />
                   <div>
                       <a href="{% url 'post-detail' post.pk %}" class="popular-title-link">{{ post.title }}</a>
-                      <p class="popular-description">{{ post.content|truncatechars:50 }}</p>
+                      <p class="popular-description">{{ post.content|striptags|truncatechars:50 }}</p>
                   </div>
                  </li>
                 {% endfor %}
